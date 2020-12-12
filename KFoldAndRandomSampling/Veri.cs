@@ -14,19 +14,27 @@ namespace KFoldAndRandomSampling
 
         public double[][] Oku(string filePath, char ayrac)
         {
-            var temp_data = from row in File.ReadAllLines(filePath)
-            select (row.Split(ayrac)).ToList();
-            Data = new double[temp_data.Count()][];
-            int satir = 0;
-            foreach (var item in temp_data)
+            try
             {
-                Data[satir] = new double[item.Count];
-                for (int kolon = 0; kolon < item.Count; kolon++)
+                var temp_data = from row in File.ReadAllLines(filePath)
+                                select (row.Split(ayrac)).ToList();
+                Data = new double[temp_data.Count()][];
+                int satir = 0;
+                foreach (var item in temp_data)
                 {
-                    Data[satir][kolon] = double.Parse(item[kolon]);
+                    Data[satir] = new double[item.Count];
+                    for (int kolon = 0; kolon < item.Count; kolon++)
+                    {
+                        Data[satir][kolon] = double.Parse(item[kolon]);
+                    }
+                    satir++;
                 }
-                satir++;
             }
+            catch (System.Exception)
+            {
+                return null;
+            }
+           
        
             return Data;
         }
@@ -73,5 +81,6 @@ namespace KFoldAndRandomSampling
 
             return (xTrain, yTrain, xTest, yTest);
         }
+
     }
 }

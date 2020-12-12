@@ -12,6 +12,8 @@ namespace KFoldAndRandomSampling
 {
     public partial class Form1 : Form
     {
+        public double[][] data;
+        public Veri v;
         public Form1()
         {
             InitializeComponent();
@@ -28,7 +30,7 @@ namespace KFoldAndRandomSampling
             }
             else
             {
-                lbl_veriyiBolme.Text = "Test Oranı";
+                lbl_veriyiBolme.Text = "Test Oranı %";
             }
 
 
@@ -68,129 +70,128 @@ namespace KFoldAndRandomSampling
             }
             else
             {
-                lbl_veriyiBolme.Text = "Test Oranı";
+                lbl_veriyiBolme.Text = "Test Oranı %";
             }
         }
 
         private void btn_hesapla2_Click(object sender, EventArgs e)
         {
-            Veri v = new Veri();
-            var data = v.Oku(@"../../wine_data.txt", ';');
-            if (cbox_metric.SelectedIndex == 0)
+            if (cbox_veriyiBolmeTipi.SelectedIndex == 0)
             {
-                KFold kf = new KFold(data, int.Parse(txt_bolmeDegeri.Text));
+                KFold kf = new KFold(v.Data, int.Parse(txt_bolmeDegeri.Text));
                 kf.Fold();
+                double[] accScore = new double[int.Parse(txt_bolmeDegeri.Text)];
                 for (int i = 0; i < int.Parse(txt_bolmeDegeri.Text); i++)
                 {
-                    dataGridView1.DataSource = kf.FoldCalculate(i).Item1.Select((x, y) => new
-                    {
-                        Sira = y + 1,
-                        MalicAcid = x[0],
-                        Ash = x[1],
-                        AlcalinityOfAsh = x[2],
-                        Magnesium = x[3],
-                        TotalPhenols = x[4],
-                        Flavanoids = x[5],
-                        NonflavanoidPhenols = x[6],
-                        Proanthocyanins = x[7],
-                        ColorIntensity = x[8],
-                        Hue = x[9],
-                        DilutedWines = x[10],
-                        Proline = x[11],
-                    }).ToList();
-
-                    dataGridView2.DataSource = kf.FoldCalculate(i).Item3.Select((x, y) => new
-                    {
-                        Sira = y + 1,
-                        MalicAcid = x[0],
-                        Ash = x[1],
-                        AlcalinityOfAsh = x[2],
-                        Magnesium = x[3],
-                        TotalPhenols = x[4],
-                        Flavanoids = x[5],
-                        NonflavanoidPhenols = x[6],
-                        Proanthocyanins = x[7],
-                        ColorIntensity = x[8],
-                        Hue = x[9],
-                        DilutedWines = x[10],
-                        Proline = x[11],
-                    }).ToList();
-
+                    var currentFoldData=kf.FoldCalculate(i);
+                    v.xTrain = currentFoldData.xTrain;
+                    v.yTrain = currentFoldData.yTrain;
+                    v.xTest = currentFoldData.xTest;
+                    v.yTest = currentFoldData.yTest;
+                    KNN knn = new KNN(int.Parse(txt_knnKDegeri2.Text), v, SecilenMetrik());
+                    accScore[i]=knn.Classifier();
+                    DataGridVeriEkle(dataGridView1, currentFoldData.xTrain);
+                    DataGridVeriEkle(dataGridView2, currentFoldData.xTest);
                 }
             }
             else
             {
                 RandomSampling rs = new RandomSampling(data, double.Parse(txt_bolmeDegeri.Text));
 
-                dataGridView1.DataSource = rs.Split2().Item1.Select((x, y) => new
-                {
-                    Sira = y + 1,
-                    MalicAcid = x[0],
-                    Ash = x[1],
-                    AlcalinityOfAsh = x[2],
-                    Magnesium = x[3],
-                    TotalPhenols = x[4],
-                    Flavanoids = x[5],
-                    NonflavanoidPhenols = x[6],
-                    Proanthocyanins = x[7],
-                    ColorIntensity = x[8],
-                    Hue = x[9],
-                    DilutedWines = x[10],
-                    Proline = x[11],
-                }).ToList();
-
-                dataGridView2.DataSource = rs.Split().Item3.Select((x, y) => new
-                {
-                    Sira = y + 1,
-                    MalicAcid = x[0],
-                    Ash = x[1],
-                    AlcalinityOfAsh = x[2],
-                    Magnesium = x[3],
-                    TotalPhenols = x[4],
-                    Flavanoids = x[5],
-                    NonflavanoidPhenols = x[6],
-                    Proanthocyanins = x[7],
-                    ColorIntensity = x[8],
-                    Hue = x[9],
-                    DilutedWines = x[10],
-                    Proline = x[11],
-                }).ToList();
+                DataGridVeriEkle(dataGridView1, v.Data);
+                DataGridVeriEkle(dataGridView2, v.Data);
             }
         }
 
         private void btn_hesapla_Click(object sender, EventArgs e)
         {
-            Veri v = new Veri();
-            var data = v.Oku(@"../../breast_canser.txt", ';');
-
-            double[] veri2 = new double[data[0].Length - 1];
-            string[] veri = textBox1.Text.Split(';');
-            for (int i = 0; i < veri.Length; i++)
+            double[] yeniVeri = new double[v.Data[0].Length - 1];
+            string[] veri = txt_yeniVeri.Text.Split(';');
+            if (v.Data[0].Length-1 == veri.Length)
             {
-                veri2[i] = double.Parse(veri[i]);
-            }
+                for (int i = 0; i < veri.Length; i++)
+                {
+                    yeniVeri[i] = double.Parse(veri[i]);
+                }
 
-            //13,24;2,59;2,87;21;118;2,8;2,69;0,39;1,82;4.32;1,04;2,93;735
+                //13,24;2,59;2,87;21;118;2,8;2,69;0,39;1,82;4.32;1,04;2,93;735
 
-            KNN knn;
-            if (cbox_metric.SelectedIndex == 0)
-            {
-                knn = new KNN(int.Parse(txt_bolmeDegeri.Text), new SquareCord());
+                KNN knn = new KNN(int.Parse(txt_knnKDegeri.Text), v, SecilenMetrik());
+                var r = knn.Classifier2(yeniVeri);
+                dataGridView1.Rows.Clear();
+                dataGridView2.Rows.Clear();
+                dataGridView1.DataSource = r.Item1.Select(x =>
+                     new
+                     {
+                         Uzaklik = x[0],
+                         Index = x[1],
+                         Sinif = x[2]
+                     }).ToList();
+
+                MessageBox.Show("Tahmin Edilen Sınıf: " + r.Item2);
             }
             else
             {
-                knn = new KNN(int.Parse(txt_bolmeDegeri.Text), new Minkowski(int.Parse(txt_pDegeri.Text)));
+                MessageBox.Show("Veri Setinin kolon sayısı ile girilen yeni değer dizinin uzunluğu("+ veri.Length.ToString() +") birbiriyle uyuşmamaktadır.");
             }
+           
+          
+        }
 
+        private void btn_veriSetiniSec_Click(object sender, EventArgs e)
+        {
+            openFileDialog1.Title = "Veri setini seçiniz";
+            openFileDialog1.Filter = "Dosya Seçin(*.txt)|*.txt";
+            openFileDialog1.FilterIndex = 1;
+            try
+            {
+                if (openFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    if (openFileDialog1.CheckFileExists)
+                    {
+                        string path = System.IO.Path.GetFullPath(openFileDialog1.FileName);
+                        v = new Veri();
+                        data = v.Oku(path, ';');
+                        DataGridVeriEkle(dataGridView1, data);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Lütfen belgeyi karşıya yükleyin.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
 
-            dataGridView1.DataSource = knn.Classifier2(v, veri2).Select(x =>
-                 new
-                 {
-                     Uzaklik = x[0],
-                     Index = x[1],
-                     Sinif = x[2]
+        private IMetric SecilenMetrik()
+        {
+            if (cbox_metric.SelectedIndex == 0)
+            {
+                return new SquareCord();
+            }
+            else
+            {
+                return new Minkowski(int.Parse(txt_pDegeri.Text));
+            }
+        }
 
-                 }).ToList();
+        private void DataGridVeriEkle(DataGridView dtGridView, double[][] tempData)
+        {
+            dtGridView.Rows.Clear();
+            dtGridView.ColumnCount = tempData[0].Length;
+            for (int i = 0; i < tempData.Length; i++)
+            {
+                DataGridViewRow row = new DataGridViewRow();
+                row.CreateCells(dtGridView);
+                for (int j = 0; j < tempData[i].Length; j++)
+                {
+                    row.Cells[j].Value = tempData[i][j];
+                }
+                dtGridView.Rows.Add(row);
+            }
         }
     }
 }

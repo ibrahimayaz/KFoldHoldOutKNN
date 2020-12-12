@@ -100,7 +100,7 @@ namespace KFoldAndRandomSampling
             return FoldData;
         }
 
-        public (double[][], double[], double[][], double[]) FoldCalculate(int foldTestNumber)
+        public (double[][] xTrain, double[] yTrain, double[][] xTest, double[] yTest) FoldCalculate(int foldTestNumber)
         {
             var test = FoldData[foldTestNumber].OrderBy(x => Guid.NewGuid()).ToArray();
             var tempTrain = new List<List<double[]>>();

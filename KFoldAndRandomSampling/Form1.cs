@@ -26,7 +26,7 @@ namespace KFoldAndRandomSampling
 
             if (cbox_veriyiBolmeTipi.SelectedIndex==0)
             {
-                lbl_veriyiBolme.Text = "K Değeri";
+                lbl_veriyiBolme.Text = "K-Fold Değeri";
             }
             else
             {
@@ -66,7 +66,7 @@ namespace KFoldAndRandomSampling
         {
             if (cbox_veriyiBolmeTipi.SelectedIndex == 0)
             {
-                lbl_veriyiBolme.Text = "K Değeri";
+                lbl_veriyiBolme.Text = "K-Fold Değeri";
             }
             else
             {
@@ -76,11 +76,14 @@ namespace KFoldAndRandomSampling
 
         private void btn_hesapla2_Click(object sender, EventArgs e)
         {
+            DataGridVeriTemizle(dataGridView1);
+            DataGridVeriTemizle(dataGridView2);
             if (cbox_veriyiBolmeTipi.SelectedIndex == 0)
             {
                 KFold kf = new KFold(v.Data, int.Parse(txt_bolmeDegeri.Text));
                 kf.Fold();
                 double[] accScore = new double[int.Parse(txt_bolmeDegeri.Text)];
+                double[] accScore2 = new double[int.Parse(txt_bolmeDegeri.Text)];
                 for (int i = 0; i < int.Parse(txt_bolmeDegeri.Text); i++)
                 {
                     var currentFoldData=kf.FoldCalculate(i);
@@ -88,18 +91,28 @@ namespace KFoldAndRandomSampling
                     v.yTrain = currentFoldData.yTrain;
                     v.xTest = currentFoldData.xTest;
                     v.yTest = currentFoldData.yTest;
-                    KNN knn = new KNN(int.Parse(txt_knnKDegeri2.Text), v, SecilenMetrik());
-                    accScore[i]=knn.Classifier();
+                    KNN knn = new KNN(int.Parse(txt_knnKDegeri.Text), v, SecilenMetrik());
+                    (accScore[i], accScore2[i])= knn.Classifier();
+
                     DataGridVeriEkle(dataGridView1, currentFoldData.xTrain);
                     DataGridVeriEkle(dataGridView2, currentFoldData.xTest);
                 }
             }
             else
             {
+                double accScore = 0;
+                double accScore2 = 0;
                 RandomSampling rs = new RandomSampling(data, double.Parse(txt_bolmeDegeri.Text));
+                var currentFoldData = rs.Split2();
+                v.xTrain = currentFoldData.xTrain;
+                v.yTrain = currentFoldData.yTrain;
+                v.xTest = currentFoldData.xTest;
+                v.yTest = currentFoldData.yTest;
+                KNN knn = new KNN(int.Parse(txt_knnKDegeri.Text), v, SecilenMetrik());
+                (accScore, accScore2) = knn.Classifier();
 
-                DataGridVeriEkle(dataGridView1, v.Data);
-                DataGridVeriEkle(dataGridView2, v.Data);
+                DataGridVeriEkle(dataGridView1, v.xTrain);
+                DataGridVeriEkle(dataGridView2, v.xTest);
             }
         }
 
@@ -113,26 +126,15 @@ namespace KFoldAndRandomSampling
                 {
                     yeniVeri[i] = double.Parse(veri[i]);
                 }
-
-                //13,24;2,59;2,87;21;118;2,8;2,69;0,39;1,82;4.32;1,04;2,93;735
-
                 KNN knn = new KNN(int.Parse(txt_knnKDegeri.Text), v, SecilenMetrik());
                 var r = knn.Classifier2(yeniVeri);
-                dataGridView1.Rows.Clear();
-                dataGridView2.Rows.Clear();
-                dataGridView1.DataSource = r.Item1.Select(x =>
-                     new
-                     {
-                         Uzaklik = x[0],
-                         Index = x[1],
-                         Sinif = x[2]
-                     }).ToList();
 
+                DataGridVeriEkle(dataGridView1, r.Item1.ToArray());
                 MessageBox.Show("Tahmin Edilen Sınıf: " + r.Item2);
             }
             else
             {
-                MessageBox.Show("Veri Setinin kolon sayısı ile girilen yeni değer dizinin uzunluğu("+ veri.Length.ToString() +") birbiriyle uyuşmamaktadır.");
+                MessageBox.Show("Veri Setinin kolon sayısı ile girilen yeni değer dizisinin uzunluğu("+ veri.Length.ToString() +") birbiriyle uyuşmamaktadır.");
             }
            
           
@@ -180,18 +182,31 @@ namespace KFoldAndRandomSampling
 
         private void DataGridVeriEkle(DataGridView dtGridView, double[][] tempData)
         {
-            dtGridView.Rows.Clear();
-            dtGridView.ColumnCount = tempData[0].Length;
+            DataGridVeriTemizle(dtGridView);
+            dtGridView.ColumnCount = tempData[0].Length + 1;
+            int siraNo = 1;
             for (int i = 0; i < tempData.Length; i++)
             {
                 DataGridViewRow row = new DataGridViewRow();
                 row.CreateCells(dtGridView);
-                for (int j = 0; j < tempData[i].Length; j++)
+                for (int j = 1; j < dtGridView.ColumnCount; j++)
                 {
-                    row.Cells[j].Value = tempData[i][j];
+                    row.Cells[0].Value = siraNo;
+                    row.Cells[j].Value = tempData[i][j-1];
                 }
                 dtGridView.Rows.Add(row);
+                siraNo++;
             }
         }
+
+        private void DataGridVeriTemizle(DataGridView dtGridView)
+        {
+            if (dtGridView.Columns.Count>0)
+            {
+                dtGridView.Columns.Clear();
+            }
+            
+        }
+
     }
 }

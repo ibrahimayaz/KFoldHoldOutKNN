@@ -41,7 +41,7 @@ namespace KFoldAndRandomSampling
         /// Veriyi oranına göre böler, test kısmına mümkün olduğunca eşit sayıda sınıf verisi ekler.
         /// </summary>
         /// <returns>xTrain, yTrain, xTest, yTest</returns>
-        public (double[][], double[], double[][], double[]) Split2()
+        public (double[][] xTrain, double[] yTrain, double[][] xTest, double[] yTest) Split2()
         {
 
             var testCount = Math.Round(Data.Length * Rate / 100);

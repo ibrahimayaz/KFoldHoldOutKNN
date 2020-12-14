@@ -19,19 +19,17 @@ namespace KFoldAndRandomSampling
             V = v;
         }
 
-        public (double, double) Classifier()
+        public double Classifier()
         {
 
             double[][] distances = new double[V.xTrain.Length][];
             double correct = 0;
-            double correct2 = 0;
-            double COUNTT = 0;
 
             for (var i = 0; i < V.xTest.Length; i++)
             {
                 for (int j = 0; j < V.xTrain.Length; j++)
                 {
-                    distances[j] = new double[2];
+                    distances[j] = new double[3];
                     distances[j][0] = Metric.Dist(V.xTest[i], V.xTrain[j]);
                     distances[j][1] = i;
                     distances[j][2] = V.yTrain[j];
@@ -55,20 +53,10 @@ namespace KFoldAndRandomSampling
                 }
 
 
-                foreach (var item in orderedDistances)
-                {
-                    var tahminEdilenSinif = (int)V.yTrain[(int)item[1]];
-                    if (testinGercekSinifi == tahminEdilenSinif)
-                    {
-                        correct2++;
-                    }
-                    COUNTT++;
-                }
 
             }
-            var r1 = correct / V.xTest.Length;
-            var r2 = correct2 / COUNTT;
-            return (r1 * 100, r2 * 100) ;
+
+            return correct / V.xTest.Length * 100;
 
 
         }
@@ -108,6 +96,17 @@ namespace KFoldAndRandomSampling
             return (resultTable, predictedClassName.ToString());
         }
 
+
+        //
+        //foreach (var item in orderedDistances)
+        //{
+        //    var tahminEdilenSinif = (int)V.yTrain[(int)item[1]];
+        //    if (testinGercekSinifi == tahminEdilenSinif)
+        //    {
+        //        correct2++;
+        //    }
+        //    COUNTT++;
+        //}
 
     }
 }

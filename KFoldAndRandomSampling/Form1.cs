@@ -83,7 +83,6 @@ namespace KFoldAndRandomSampling
                 KFold kf = new KFold(v.Data, int.Parse(txt_bolmeDegeri.Text));
                 kf.Fold();
                 double[] accScore = new double[int.Parse(txt_bolmeDegeri.Text)];
-                double[] accScore2 = new double[int.Parse(txt_bolmeDegeri.Text)];
                 for (int i = 0; i < int.Parse(txt_bolmeDegeri.Text); i++)
                 {
                     var currentFoldData=kf.FoldCalculate(i);
@@ -92,16 +91,18 @@ namespace KFoldAndRandomSampling
                     v.xTest = currentFoldData.xTest;
                     v.yTest = currentFoldData.yTest;
                     KNN knn = new KNN(int.Parse(txt_knnKDegeri.Text), v, SecilenMetrik());
-                    (accScore[i], accScore2[i])= knn.Classifier();
+                    accScore[i]= knn.Classifier();
 
                     DataGridVeriEkle(dataGridView1, currentFoldData.xTrain);
                     DataGridVeriEkle(dataGridView2, currentFoldData.xTest);
                 }
+
+                var accuracyScore = accScore.Sum() / int.Parse(txt_bolmeDegeri.Text);
+                MessageBox.Show("Accruacy Score: "+accuracyScore.ToString());
             }
             else
             {
                 double accScore = 0;
-                double accScore2 = 0;
                 RandomSampling rs = new RandomSampling(data, double.Parse(txt_bolmeDegeri.Text));
                 var currentFoldData = rs.Split2();
                 v.xTrain = currentFoldData.xTrain;
@@ -109,10 +110,11 @@ namespace KFoldAndRandomSampling
                 v.xTest = currentFoldData.xTest;
                 v.yTest = currentFoldData.yTest;
                 KNN knn = new KNN(int.Parse(txt_knnKDegeri.Text), v, SecilenMetrik());
-                (accScore, accScore2) = knn.Classifier();
-
+                accScore= knn.Classifier();
                 DataGridVeriEkle(dataGridView1, v.xTrain);
                 DataGridVeriEkle(dataGridView2, v.xTest);
+                MessageBox.Show("Accruacy Score: " + accScore.ToString());
+
             }
         }
 

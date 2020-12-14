@@ -46,6 +46,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Canberra.cs" />
+    <Compile Include="FeatureScaling.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -53,6 +55,7 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="IMetric.cs" />
+    <Compile Include="INormalization.cs" />
     <Compile Include="KFold.cs" />
     <Compile Include="KNN.cs" />
     <Compile Include="Minkowski.cs" />

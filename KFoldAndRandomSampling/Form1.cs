@@ -76,68 +76,90 @@ namespace KFoldAndRandomSampling
 
         private void btn_hesapla2_Click(object sender, EventArgs e)
         {
-            DataGridVeriTemizle(dataGridView1);
-            DataGridVeriTemizle(dataGridView2);
-            if (cbox_veriyiBolmeTipi.SelectedIndex == 0)
+            if (Kontrol())
             {
-                KFold kf = new KFold(v.Data, int.Parse(txt_bolmeDegeri.Text));
-                kf.Fold();
-                double[] accScore = new double[int.Parse(txt_bolmeDegeri.Text)];
-                for (int i = 0; i < int.Parse(txt_bolmeDegeri.Text); i++)
+                DataGridVeriTemizle(dataGridView1);
+                DataGridVeriTemizle(dataGridView2);
+                if (cbox_veriyiBolmeTipi.SelectedIndex == 0)
                 {
-                    var currentFoldData=kf.FoldCalculate(i);
-                    v.xTrain = currentFoldData.xTrain;
+                    KFold kf = new KFold(v.Data, int.Parse(txt_bolmeDegeri.Text));
+                    kf.Fold();
+                    double[] accScore = new double[int.Parse(txt_bolmeDegeri.Text)];
+                    for (int i = 0; i < int.Parse(txt_bolmeDegeri.Text); i++)
+                    {
+                        var currentFoldData = kf.FoldCalculate(i);
+                        v.xTrain = cbox_normalizasyon.Checked ? new FeatureScaling().Normalize(currentFoldData.xTrain) : currentFoldData.xTrain;
+                        v.yTrain = currentFoldData.yTrain;
+                        v.xTest = cbox_normalizasyon.Checked ? new FeatureScaling().Normalize(currentFoldData.xTest) : currentFoldData.xTest;
+                        v.yTest = currentFoldData.yTest;
+                        KNN knn = new KNN(int.Parse(txt_knnKDegeri.Text), v, SecilenMetrik());
+                        accScore[i] = knn.Classifier();
+
+                        DataGridVeriEkle(dataGridView1, v.xTrain);
+                        DataGridVeriEkle(dataGridView2, v.xTest);
+                    }
+                    DataGridVeriTemizle(dataGridView3);
+                    dataGridView3.DataSource = accScore.Select((x, y) => new {
+                        FoldNumber = y + 1,
+                        AccScore = x
+                    }).ToList();
+
+                    var accuracyScore = accScore.Sum() / int.Parse(txt_bolmeDegeri.Text);
+                    MessageBox.Show("Accruacy Score: " + accuracyScore.ToString());
+                }
+                else
+                {
+                    double accScore = 0;
+                    RandomSampling rs = new RandomSampling(data, double.Parse(txt_bolmeDegeri.Text));
+                    var currentFoldData = rs.Split2();
+                    v.xTrain = cbox_normalizasyon.Checked ? new FeatureScaling().Normalize(currentFoldData.xTrain) : currentFoldData.xTrain;
                     v.yTrain = currentFoldData.yTrain;
-                    v.xTest = currentFoldData.xTest;
+                    v.xTest = cbox_normalizasyon.Checked ? new FeatureScaling().Normalize(currentFoldData.xTest) : currentFoldData.xTest;
                     v.yTest = currentFoldData.yTest;
                     KNN knn = new KNN(int.Parse(txt_knnKDegeri.Text), v, SecilenMetrik());
-                    accScore[i]= knn.Classifier();
+                    accScore = knn.Classifier();
+                    DataGridVeriEkle(dataGridView1, v.xTrain);
+                    DataGridVeriEkle(dataGridView2, v.xTest);
+                    DataGridVeriTemizle(dataGridView3);
+                    MessageBox.Show("Accruacy Score: " + accScore.ToString());
 
-                    DataGridVeriEkle(dataGridView1, currentFoldData.xTrain);
-                    DataGridVeriEkle(dataGridView2, currentFoldData.xTest);
                 }
-
-                var accuracyScore = accScore.Sum() / int.Parse(txt_bolmeDegeri.Text);
-                MessageBox.Show("Accruacy Score: "+accuracyScore.ToString());
             }
             else
             {
-                double accScore = 0;
-                RandomSampling rs = new RandomSampling(data, double.Parse(txt_bolmeDegeri.Text));
-                var currentFoldData = rs.Split2();
-                v.xTrain = currentFoldData.xTrain;
-                v.yTrain = currentFoldData.yTrain;
-                v.xTest = currentFoldData.xTest;
-                v.yTest = currentFoldData.yTest;
-                KNN knn = new KNN(int.Parse(txt_knnKDegeri.Text), v, SecilenMetrik());
-                accScore= knn.Classifier();
-                DataGridVeriEkle(dataGridView1, v.xTrain);
-                DataGridVeriEkle(dataGridView2, v.xTest);
-                MessageBox.Show("Accruacy Score: " + accScore.ToString());
-
+                MessageBox.Show("Boş alanlar var kontrol ediniz.");
             }
+            
         }
 
         private void btn_hesapla_Click(object sender, EventArgs e)
         {
-            double[] yeniVeri = new double[v.Data[0].Length - 1];
-            string[] veri = txt_yeniVeri.Text.Split(';');
-            if (v.Data[0].Length-1 == veri.Length)
+            if (Kontrol())
             {
-                for (int i = 0; i < veri.Length; i++)
+                double[] yeniVeri = new double[v.Data[0].Length - 1];
+                string[] veri = txt_yeniVeri.Text.Split(';');
+                if (v.Data[0].Length - 1 == veri.Length)
                 {
-                    yeniVeri[i] = double.Parse(veri[i]);
-                }
-                KNN knn = new KNN(int.Parse(txt_knnKDegeri.Text), v, SecilenMetrik());
-                var r = knn.Classifier2(yeniVeri);
+                    for (int i = 0; i < veri.Length; i++)
+                    {
+                        yeniVeri[i] = double.Parse(veri[i]);
+                    }
+                    KNN knn = new KNN(int.Parse(txt_knnKDegeri.Text), v, SecilenMetrik());
+                    var r = knn.Classifier2(yeniVeri);
 
-                DataGridVeriEkle(dataGridView1, r.Item1.ToArray());
-                MessageBox.Show("Tahmin Edilen Sınıf: " + r.Item2);
+                    DataGridVeriEkle(dataGridView3, r.Item1.ToArray());
+                    MessageBox.Show("Tahmin Edilen Sınıf: " + r.Item2);
+                }
+                else
+                {
+                    MessageBox.Show("Veri Setinin kolon sayısı ile girilen yeni değer dizisinin uzunluğu(" + veri.Length.ToString() + ") birbiriyle uyuşmamaktadır.");
+                }
             }
             else
             {
-                MessageBox.Show("Veri Setinin kolon sayısı ile girilen yeni değer dizisinin uzunluğu("+ veri.Length.ToString() +") birbiriyle uyuşmamaktadır.");
+                MessageBox.Show("Boş alanlar var kontrol ediniz.");
             }
+            
            
           
         }
@@ -176,6 +198,10 @@ namespace KFoldAndRandomSampling
             {
                 return new SquareCord();
             }
+            else if (cbox_metric.SelectedIndex == 2)
+            {
+                return new Canberra();
+            }
             else
             {
                 return new Minkowski(int.Parse(txt_pDegeri.Text));
@@ -209,6 +235,16 @@ namespace KFoldAndRandomSampling
             }
             
         }
-
+        private bool Kontrol()
+        {
+            if (string.IsNullOrEmpty(txt_knnKDegeri.Text) || (txt_pDegeri.Visible==true && string.IsNullOrEmpty(txt_pDegeri.Text)))
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
     }
 }

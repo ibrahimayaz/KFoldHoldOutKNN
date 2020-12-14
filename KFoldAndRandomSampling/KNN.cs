@@ -21,7 +21,7 @@ namespace KFoldAndRandomSampling
 
         public double Classifier()
         {
-
+           
             double[][] distances = new double[V.xTrain.Length][];
             double correct = 0;
 
@@ -36,27 +36,22 @@ namespace KFoldAndRandomSampling
                 }
 
                 var orderedDistances = distances.OrderBy(x => x[0]).Take(K).ToList();
-                var testinGercekSinifi = V.yTest[i];
-
-
                 var classNameGroups = orderedDistances.GroupBy(x => x[2]).Select(x => new
                 {
                     ClassName = x.Key,
                     Count = x.Count()
                 }).ToList();
 
-                var predictedClassName = classNameGroups.OrderByDescending(x => x.Count).Select(x => x.ClassName).Take(1).ToArray()[0];
+                var predictedClass = classNameGroups.OrderByDescending(x => x.Count).Select(x => x.ClassName).Take(1).ToArray()[0];
+                var realClass = V.yTest[i];
 
-                if (predictedClassName== testinGercekSinifi)
+                if (predictedClass == realClass)
                 {
                     correct++;
                 }
-
-
-
             }
 
-            return correct / V.xTest.Length * 100;
+            return (correct / V.xTest.Length) * 100;
 
 
         }
@@ -76,6 +71,7 @@ namespace KFoldAndRandomSampling
                 }
                 index++;
             }
+           
             double[][] distances = new double[V.Data.Length][];
 
             for (int i = 0; i < tempData.Length; i++)
@@ -95,18 +91,5 @@ namespace KFoldAndRandomSampling
             var predictedClassName = classNameGroups.OrderByDescending(x => x.Count).Select(x => x.ClassName).Take(1).ToArray()[0];
             return (resultTable, predictedClassName.ToString());
         }
-
-
-        //
-        //foreach (var item in orderedDistances)
-        //{
-        //    var tahminEdilenSinif = (int)V.yTrain[(int)item[1]];
-        //    if (testinGercekSinifi == tahminEdilenSinif)
-        //    {
-        //        correct2++;
-        //    }
-        //    COUNTT++;
-        //}
-
     }
 }

@@ -204,7 +204,7 @@ namespace KFoldAndRandomSampling
             }
             else
             {
-                return new Minkowski(int.Parse(txt_pDegeri.Text));
+                return new Minkowski(double.Parse(txt_pDegeri.Text));
             }
         }
 

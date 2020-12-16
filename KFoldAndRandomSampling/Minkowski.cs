@@ -8,8 +8,8 @@ namespace KFoldAndRandomSampling
 {
     public class Minkowski:IMetric
     {
-        private int P { get; set; }
-        public Minkowski(int p)
+        private double P { get; set; }
+        public Minkowski(double p)
         {
             P = p;
         }

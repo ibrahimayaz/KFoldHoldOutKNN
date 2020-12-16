@@ -71,7 +71,6 @@ namespace KFoldAndRandomSampling
                 }
                 index++;
             }
-           
             double[][] distances = new double[V.Data.Length][];
 
             for (int i = 0; i < tempData.Length; i++)
@@ -81,15 +80,15 @@ namespace KFoldAndRandomSampling
                 distances[i][1] = i;
                 distances[i][2] = V.Data[i][0];
             }
-            var resultTable = distances.OrderBy(x => x[0]).Take(K).ToList();
-            var classNameGroups = resultTable.GroupBy(x => x[2]).Select(x => new
+            var orderedDistances = distances.OrderBy(x => x[0]).Take(K).ToList();
+            var classNameGroups = orderedDistances.GroupBy(x => x[2]).Select(x => new
             {
                 ClassName = x.Key,
                 Count = x.Count()
             }).ToList();
 
             var predictedClassName = classNameGroups.OrderByDescending(x => x.Count).Select(x => x.ClassName).Take(1).ToArray()[0];
-            return (resultTable, predictedClassName.ToString());
+            return (orderedDistances, predictedClassName.ToString());
         }
     }
 }

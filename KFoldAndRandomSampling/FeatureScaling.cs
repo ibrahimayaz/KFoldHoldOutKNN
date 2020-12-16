@@ -18,10 +18,9 @@ namespace KFoldAndRandomSampling
     /// </summary>
     public class FeatureScaling : INormalization
     {
-
+        
         public double[][] Normalize(double[][] data)
         {
-
             double[][] Data = new double[data.Length][];
             var minMax = EnBuyukEnKucuk(data);
             int satir = 0;

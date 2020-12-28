@@ -1,4 +1,4 @@
-<h3>KFoldRandomSamplingKNN</h3>
+<h3>KNN Algorithm</h3>
 <p>GUI design using K-Fold Cross Validation, Random Sampling and KNN Algorithm</p>
 <p>Square Cold, Minkowski (P = 1,2,3 ..) and Canberra distance metrics are also used in this study.</p>
 <div>
